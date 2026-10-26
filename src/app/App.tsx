@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { EMAIL, GITHUB_URL, LINKEDIN_URL, RESUME_URL, PHOTO_URL, CONTACT_ENDPOINT, STUDY_YEAR, EDUCATION_YEARS } from "./site.config";
 
 type Page = "home" | "portfolio" | "about";
 
@@ -25,6 +26,7 @@ type Project = {
   category: "web" | "mobile" | "tools";
   year: string;
   hue: number;
+  href?: string; // optional link to the live project or repo
 };
 
 const PROJECTS: Project[] = [
@@ -85,6 +87,13 @@ const SKILLS = [
   "Linux",
 ];
 
+// Project row: becomes a real link only when the project has an href.
+function Row({ href, className = "", ...rest }: any) {
+  const Tag: any = href ? motion.a : motion.div;
+  const link = href ? { href, target: "_blank", rel: "noopener noreferrer" } : {};
+  return <Tag {...link} className={className + (href ? " cursor-pointer hover:bg-white/[0.025]" : "")} {...rest} />;
+}
+
 // ── Thumb ─────────────────────────────────────────────────────────────────────
 
 function ProjectThumb({ project, size = "sm" }: { project: Project; size?: "sm" | "md" }) {
@@ -131,6 +140,7 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
           <li key={page}>
             <button
               onClick={() => onNav(page)}
+              aria-current={current === page ? "page" : undefined}
               className="relative font-mono text-[11px] tracking-widest uppercase transition-colors pb-px"
               style={{ color: current === page ? "#ffffff" : "rgba(255,255,255,0.38)" }}
             >
@@ -203,7 +213,7 @@ function Ticker() {
   return (
     <div className="overflow-hidden whitespace-nowrap py-2.5 select-none" style={{ background: ACCENT }}>
       <div
-        className="inline-block"
+        className="inline-block ticker"
         style={{
           animation: "ticker 28s linear infinite",
           willChange: "transform",
@@ -252,7 +262,7 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
               {"can't afford downtime."}
             </p>
             <p className="font-mono text-[10px] tracking-widest text-white/20 uppercase mt-3">
-              Singapore · 2025
+              Singapore · {new Date().getFullYear()}
             </p>
           </div>
         </div>
@@ -278,7 +288,7 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
         <div className="flex flex-wrap gap-8 mb-10">
           {[
             { val: "4+", label: "Projects shipped" },
-            { val: "3rd", label: "Year at RP" },
+            { val: STUDY_YEAR, label: "Year at RP" },
             { val: "Now", label: "Open to intern" },
           ].map(({ val, label }) => (
             <div key={label} className="flex flex-col gap-0.5">
@@ -313,12 +323,13 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
 
         <div className="flex flex-col divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           {PROJECTS.slice(0, 3).map((p, i) => (
-            <motion.div
+            <Row
+              href={p.href}
               key={p.num}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.08 * i, duration: 0.3 }}
-              className="flex items-center justify-between py-5 group cursor-pointer -mx-3 px-3 rounded transition-colors hover:bg-white/[0.025]"
+              className="flex items-center justify-between py-5 group -mx-3 px-3 rounded transition-colors"
             >
               <div className="flex items-center gap-5">
                 <span className="font-mono text-[10px] text-white/20 w-6 flex-shrink-0">{p.num}</span>
@@ -340,7 +351,7 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
                 </div>
                 <ProjectThumb project={p} size="sm" />
               </div>
-            </motion.div>
+            </Row>
           ))}
         </div>
 
@@ -416,12 +427,13 @@ function PortfolioPage() {
 
         <div className="flex flex-col divide-y" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           {filtered.map((p, i) => (
-            <motion.div
+            <Row
+              href={p.href}
               key={p.num}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06 * i, duration: 0.3 }}
-              className="flex items-start justify-between py-8 group cursor-pointer -mx-3 px-3 rounded transition-colors hover:bg-white/[0.025]"
+              className="flex items-start justify-between py-8 group -mx-3 px-3 rounded transition-colors"
             >
               <div className="flex gap-5 md:gap-8 flex-1 mr-4">
                 <span className="font-mono text-[10px] text-white/20 mt-1 w-5 flex-shrink-0 pt-px">{p.num}</span>
@@ -446,7 +458,7 @@ function PortfolioPage() {
               <div className="flex-shrink-0 mt-1">
                 <ProjectThumb project={p} size="md" />
               </div>
-            </motion.div>
+            </Row>
           ))}
         </div>
       </section>
@@ -460,11 +472,33 @@ function PortfolioPage() {
 
 function AboutPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [note, setNote] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    if (!CONTACT_ENDPOINT) {
+      // No form service configured: hand the message to the visitor's email app.
+      const body = `${form.message}\n\n— ${form.name} (${form.email})`;
+      window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent("Portfolio message from " + form.name)}&body=${encodeURIComponent(body)}`;
+      setNote("Your email app should now be open. Press send there to deliver your message.");
+      setStatus("sent");
+      return;
+    }
+    setStatus("sending");
+    try {
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setNote("Message sent — I'll be in touch soon.");
+      setStatus("sent");
+    } catch {
+      setNote("Couldn't send your message. Check your connection and try again, or email me directly.");
+      setStatus("error");
+    }
   };
 
   return (
@@ -486,7 +520,11 @@ function AboutPage() {
               border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
-            <span className="font-mono text-[9px] text-white/15 tracking-widest">PHOTO</span>
+            {PHOTO_URL ? (
+              <img src={PHOTO_URL} alt="Vincent" className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-mono text-[9px] text-white/15 tracking-widest">PHOTO</span>
+            )}
           </div>
 
           <div className="flex flex-col gap-4">
@@ -507,14 +545,16 @@ function AboutPage() {
               driven team.
             </p>
             <div className="flex flex-wrap gap-3 mt-2">
-              <button
+              <a
+                href={RESUME_URL}
+                download
                 className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full text-black hover:brightness-90 transition-all"
                 style={{ background: ACCENT }}
               >
                 DOWNLOAD RESUME
-              </button>
+              </a>
               <a
-                href="mailto:hello@vincent.dev"
+                href={`mailto:${EMAIL}`}
                 className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full border text-white hover:border-white/50 transition-all"
                 style={{ borderColor: "rgba(255,255,255,0.18)" }}
               >
@@ -558,7 +598,7 @@ function AboutPage() {
                 </p>
               </div>
               <span className="font-mono text-[10px] text-white/25 tracking-widest flex-shrink-0">
-                2022 – 2025
+                {EDUCATION_YEARS}
               </span>
             </div>
           </div>
@@ -574,21 +614,21 @@ function AboutPage() {
           Get in Touch
         </p>
         <a
-          href="mailto:hello@vincent.dev"
+          href={`mailto:${EMAIL}`}
           className="block text-[clamp(1.6rem,5vw,3rem)] font-bold mb-10 hover:opacity-80 transition-opacity"
           style={{ color: ACCENT, fontFamily: "'Space Grotesk', sans-serif" }}
         >
-          hello@vincent.dev
+          {EMAIL}
         </a>
 
-        {sent ? (
+        {status === "sent" ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             className="w-fit px-5 py-3 font-mono text-sm rounded"
             style={{ border: `1px solid ${ACCENT}`, color: ACCENT }}
           >
-            Message sent — {"I'll"} be in touch soon.
+            {note}
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-lg">
@@ -598,8 +638,9 @@ function AboutPage() {
                 { key: "email", label: "Email", type: "email" },
               ].map(({ key, label, type }) => (
                 <div key={key} className="flex-1 flex flex-col gap-1.5">
-                  <label className="font-mono text-[10px] tracking-widest text-white/25 uppercase">{label}</label>
+                  <label className="font-mono text-[10px] tracking-widest text-white/25 uppercase" htmlFor={`contact-${key}`}>{label}</label>
                   <input
+                    id={`contact-${key}`}
                     type={type}
                     required
                     value={form[key as keyof typeof form]}
@@ -613,8 +654,9 @@ function AboutPage() {
               ))}
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-[10px] tracking-widest text-white/25 uppercase">Message</label>
+              <label className="font-mono text-[10px] tracking-widest text-white/25 uppercase" htmlFor="contact-message">Message</label>
               <textarea
+                id="contact-message"
                 required
                 rows={4}
                 value={form.message}
@@ -627,11 +669,15 @@ function AboutPage() {
             </div>
             <button
               type="submit"
+              disabled={status === "sending"}
               className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full text-black hover:brightness-90 transition-all"
               style={{ background: ACCENT }}
             >
-              SEND MESSAGE →
+              {status === "sending" ? "SENDING…" : "SEND MESSAGE →"}
             </button>
+            {status === "error" && (
+              <p role="alert" className="font-mono text-[11px]" style={{ color: "#ff6b6b" }}>{note}</p>
+            )}
           </form>
         )}
       </section>
@@ -650,18 +696,25 @@ function Footer() {
       style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
     >
       <span className="font-mono text-[10px] text-white/20 tracking-widest uppercase">
-        © 2025 Vincent · Republic Polytechnic
+        © {new Date().getFullYear()} Vincent · Republic Polytechnic
       </span>
       <div className="flex gap-5">
-        {["GitHub", "LinkedIn", "hello@vincent.dev"].map((item) => (
-          <a
-            key={item}
-            href="#"
-            className="font-mono text-[10px] text-white/20 tracking-widest uppercase hover:text-white/50 transition-colors"
-          >
-            {item}
-          </a>
-        ))}
+        {[
+          { label: "GitHub", href: GITHUB_URL },
+          { label: "LinkedIn", href: LINKEDIN_URL },
+          { label: EMAIL, href: `mailto:${EMAIL}` },
+        ]
+          .filter((l) => l.href)
+          .map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="font-mono text-[10px] text-white/20 tracking-widest uppercase hover:text-white/50 transition-colors"
+            >
+              {label}
+            </a>
+          ))}
       </div>
     </footer>
   );
@@ -687,6 +740,8 @@ export default function App() {
       }}
     >
       <style>{`
+        @media (prefers-reduced-motion: reduce) { .ticker { animation: none !important; } }
+        :focus-visible { outline: 2px solid #ccff00; outline-offset: 3px; }
         @keyframes ticker {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }

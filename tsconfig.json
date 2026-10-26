@@ -29,7 +29,6 @@
   },
   "include": [
     "src",
-    "vite.config.ts",
-    "vite.figma.config.ts"
+    "vite.config.ts"
   ]
 }
