@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { EMAIL, GITHUB_URL, LINKEDIN_URL, RESUME_URL, PHOTO_URL, CONTACT_ENDPOINT, STUDY_YEAR, EDUCATION_YEARS } from "./site.config";
 
@@ -27,49 +28,94 @@ type Project = {
   year: string;
   hue: number;
   href?: string; // optional link to the live project or repo
+  image?: string; // screenshot in public/projects/
 };
+
+const GH = "https://github.com/vincent240701";
 
 const PROJECTS: Project[] = [
   {
     num: "01",
-    title: "Realtime Order Tracker",
+    title: "Pokémon Card Browser",
     description:
-      "Live operations dashboard with WebSocket order updates, map view, and alerting for delayed shipments. Built for a logistics startup handling 10k+ daily orders.",
-    tags: ["React", "Node.js", "WebSocket", "Redis"],
-    category: "web",
-    year: "2024",
-    hue: 80,
+      "React Native app that groups Pokémon by type (Fire, Water, Lightning, Grass) in a sectioned list, with colour-coded headers, icons, and card art loaded from the web.",
+    tags: ["React Native", "Expo", "JavaScript"],
+    category: "mobile",
+    year: "2026",
+    hue: 0,
+    href: `${GH}/L10pokemon`,
+    image: "/projects/pokemon.jpg",
   },
   {
     num: "02",
-    title: "Inventory API",
+    title: "Car Quiz",
     description:
-      "REST service handling role-based access, stock audit logs, and scheduled reporting for a retail client. Handles 500 concurrent requests with sub-50ms p99.",
-    tags: ["Go", "PostgreSQL", "Docker"],
-    category: "web",
-    year: "2024",
-    hue: 200,
+      "Image-based quiz app: pick the car in each photo from a dropdown, then get scored with feedback. Built with a reusable question component and React state.",
+    tags: ["React Native", "Expo", "Picker"],
+    category: "mobile",
+    year: "2026",
+    hue: 30,
+    href: `${GH}/L06Quiz`,
+    image: "/projects/car-quiz.jpg",
   },
   {
     num: "03",
-    title: "Habit Tracker App",
+    title: "Boat Showroom",
     description:
-      "Cross-platform mobile app with offline-first sync and streak-based motivation nudges. Launched on both App Store and Google Play.",
-    tags: ["Flutter", "SQLite", "Dart"],
+      "Scrollable showroom of boats built from a reusable card component, restyled with a custom StyleSheet: header banner, rounded images, and icon badges.",
+    tags: ["React Native", "Components", "StyleSheet"],
     category: "mobile",
-    year: "2023",
-    hue: 290,
+    year: "2026",
+    hue: 200,
+    href: `${GH}/L08`,
+    image: "/projects/boat-showroom.jpg",
   },
   {
     num: "04",
-    title: "CLI Deploy Tool",
+    title: "Grade Checking System",
     description:
-      "Internal command-line tool that automates build, test, and deploy steps across environments. Reduced deployment time by 70% for a 5-person dev team.",
-    tags: ["Python", "Docker", "GitHub Actions"],
+      "35 parametrised pytest cases (100% coverage) for grade-average and pass/fail functions, run on every push via GitHub Actions. The tests caught two planted bugs: averages rounding down and a score of exactly 50 failing.",
+    tags: ["Python", "pytest", "GitHub Actions"],
     category: "tools",
-    year: "2023",
-    hue: 30,
+    year: "2026",
+    hue: 80,
+    href: `${GH}/grade-checks`,
+    image: "/projects/grade-checks.jpg",
   },
+  {
+    num: "05",
+    title: "This Portfolio",
+    description:
+      "The site you're on: a single-page React + TypeScript portfolio with Tailwind CSS styling and Motion page transitions, built with Vite.",
+    tags: ["React", "TypeScript", "Tailwind", "Vite"],
+    category: "web",
+    year: "2026",
+    hue: 290,
+    href: `${GH}/MyPortfolio`,
+    image: "/projects/portfolio.jpg",
+  },
+];
+
+// LinkedIn Learning certificates, newest first. `id` is the Certificate ID on each PDF.
+const CERTS: { title: string; date: string; skills: string[]; id: string }[] = [
+  { title: "Playwright Python and Pytest for Web Automation Testing", date: "Nov 2026", skills: ["pytest", "Python", "Web Testing"], id: "db571a81b21d56da559c3830eef03009d27971eda8a6e9e11d9824919c4eabe1" },
+  { title: "Learning Photoshop (2023)", date: "Aug 2026", skills: ["Adobe Photoshop"], id: "0e19ee379ab6eda0e2b3a4d15ca4e7247f29fa34fa285e7752262eea2d5adbbb" },
+  { title: "Illustrator 2023 Quick Start", date: "Aug 2026", skills: ["Adobe Illustrator"], id: "d5d98445cf36fb65877b8ac2d32bad744444a0a676cfb5a110f37abe0aa6dbec" },
+  { title: "Building a Website with Node.js and Express.js", date: "Aug 2026", skills: ["Express.js", "Node.js"], id: "152046310d441664e36e880d78eab7c91fb2a8d975c0689c5202b614cf12f54f" },
+  { title: "Programming Foundations: APIs and Web Services", date: "Aug 2026", skills: ["API Development", "Web Services"], id: "a1f265038766ce664858ad2722669bcf9caa4c821fb18e175ac52416031c8ece" },
+  { title: "JavaScript: Web Form Programming", date: "Jul 2026", skills: ["JavaScript", "Form Design"], id: "f83bee13d96b27a875161b7dd881f89855cb1a59a52471a35c2cfbc49d8b9f87" },
+  { title: "JavaScript: Enhancing the DOM", date: "Jun 2026", skills: ["JavaScript", "DOM"], id: "b3faac3cf08d7382f0951b85399d694e89e865cbe070bec9a31a9750fc762b05" },
+  { title: "Create a Quick, Clean, and Cheap Website with Bootstrap Templates", date: "Jun 2026", skills: ["Bootstrap", "Web Development"], id: "de1a4859ede2d7e8f834f0155b93268888a87c9c26b407025860704db8a31a45" },
+  { title: "Introduction to AI Ethics and Safety", date: "Jun 2026", skills: ["Responsible AI", "Data Ethics"], id: "898a09144fb8561f06709d3c8234df1ff487203e132ebf736974ab68a6ca0f10" },
+  { title: "Unit Testing and Test Driven Development in Python", date: "Feb 2026", skills: ["TDD", "Python"], id: "609884a61c54597b9b6e7356430ac939cb4eeb91782160333cc5815bfd48193b" },
+  { title: "Software Testing Foundations: Test Planning", date: "Jan 2026", skills: ["Software Testing", "Test Planning"], id: "682afb362deb720934ae15c737f030b3e878f2eb95df0c00fbc180319cfe2199" },
+  { title: "Python for Data Visualization", date: "Jan 2026", skills: ["Data Visualization", "Python"], id: "b98727e4b530d3b030739e7760e04d4196ef37c0a2adfe627b93de8549d1adae" },
+  { title: "Python Object-Oriented Programming", date: "Jan 2026", skills: ["Python", "OOP"], id: "79bd234dbc91af06ce35add4f065d99af389c5a51767c9279c9d627adf8f5a16" },
+  { title: "Python Essential Training", date: "Jan 2026", skills: ["Python"], id: "fc8d5fe66614a808a3a948f03694787ee4e902e868c6850970a7627275a89dd7" },
+  { title: "What Is Scrum?", date: "Nov 2025", skills: ["Scrum"], id: "5428c4df0179a99eb895386965e97536ee69df4578aabb928259fb661d1875ad" },
+  { title: "Agile Foundations", date: "Nov 2025", skills: ["Agile", "Project Management"], id: "1d715305a86209f0746041db795523c469d8bc5e4de0f2028ef10df746964865" },
+  { title: "Project Management Foundations: Requirements", date: "Nov 2025", skills: ["Requirements", "Project Management"], id: "f5687dc378ead90395139ea4bd34c9b2aec32bf1a16afe41753b9934c1505eea" },
+  { title: "Certified Entry-Level Python Programmer (PCEP-30-02) Cert Prep", date: "Jul 2025", skills: ["Python"], id: "df5d0b6361b934ea91273863d98aa1dc6ce11b44e0fb83ae4cf8f645924d932c" },
 ];
 
 const SKILLS = [
@@ -97,19 +143,101 @@ function Row({ href, className = "", ...rest }: any) {
 // ── Thumb ─────────────────────────────────────────────────────────────────────
 
 function ProjectThumb({ project, size = "sm" }: { project: Project; size?: "sm" | "md" }) {
-  const w = size === "sm" ? "w-20 h-14" : "w-28 h-20";
-  return (
+  const [open, setOpen] = useState(false);
+  const w = size === "sm" ? "w-24 h-16" : "w-32 h-24 md:w-48 md:h-32";
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  const box = (
     <div
-      className={`${w} rounded flex-shrink-0 flex items-center justify-center overflow-hidden`}
+      className={`${w} rounded flex-shrink-0 flex items-center justify-center overflow-hidden relative`}
       style={{ background: `hsla(${project.hue}, 70%, 12%, 1)`, border: `1px solid hsla(${project.hue}, 60%, 25%, 0.4)` }}
     >
-      <span
-        className="font-mono text-[9px] font-bold tracking-widest"
-        style={{ color: `hsla(${project.hue}, 80%, 70%, 0.7)` }}
-      >
-        {project.num}
-      </span>
+      {project.image ? (
+        <>
+          <img
+            src={project.image}
+            alt={`${project.title} screenshot`}
+            loading="lazy"
+            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 hover:opacity-100 transition-opacity font-mono text-[9px] tracking-widest text-white">
+            VIEW ⤢
+          </span>
+        </>
+      ) : (
+        <span
+          className="font-mono text-[9px] font-bold tracking-widest"
+          style={{ color: `hsla(${project.hue}, 80%, 70%, 0.7)` }}
+        >
+          {project.num}
+        </span>
+      )}
     </div>
+  );
+
+  if (!project.image) return box;
+
+  return (
+    <>
+      <span
+        role="button"
+        tabIndex={0}
+        aria-label={`View full screenshot of ${project.title}`}
+        className="cursor-zoom-in"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setOpen(true); } }}
+      >
+        {box}
+      </span>
+      {createPortal(
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              className="fixed inset-0 z-50 overflow-y-auto cursor-zoom-out"
+              style={{ background: "rgba(0,0,0,0.9)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${project.title} screenshot`}
+            >
+              <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-4 font-mono text-[11px] tracking-widest uppercase" style={{ background: "rgba(0,0,0,0.85)" }}>
+                <span className="text-white">{project.title}</span>
+                <div className="flex gap-6" onClick={(e) => e.stopPropagation()}>
+                  {project.href && (
+                    <a href={project.href} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }}>
+                      View on GitHub ↗
+                    </a>
+                  )}
+                  <button onClick={() => setOpen(false)} className="text-white/60 hover:text-white uppercase tracking-widest">
+                    Close ✕
+                  </button>
+                </div>
+              </div>
+              <img
+                src={project.image}
+                alt={`${project.title} full screenshot`}
+                className="block mx-auto my-6 rounded max-w-[min(92vw,1000px)] h-auto cursor-default"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
   );
 }
 
@@ -227,6 +355,106 @@ function Ticker() {
   );
 }
 
+// ── Certifications ────────────────────────────────────────────────────────────
+
+const certImg = (id: string) => `/certs/${id.slice(0, 12)}.jpg`;
+const certUrl = (id: string) => `https://www.linkedin.com/learning/certificates/${id}`;
+
+function Certifications() {
+  const [open, setOpen] = useState<(typeof CERTS)[number] | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <div className="mt-10">
+      <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">
+        Certifications · LinkedIn Learning ({CERTS.length})
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {CERTS.map((c) => (
+          <div
+            key={c.id}
+            className="rounded overflow-hidden flex flex-col"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            <button
+              onClick={() => setOpen(c)}
+              className="block overflow-hidden aspect-[1100/850] bg-white/5 cursor-zoom-in"
+              aria-label={`View certificate: ${c.title}`}
+            >
+              <img
+                src={certImg(c.id)}
+                alt={`${c.title} certificate`}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]"
+              />
+            </button>
+            <div className="p-4 flex flex-col gap-2 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-semibold text-white leading-snug" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  {c.title}
+                </p>
+                <span className="font-mono text-[10px] text-white/25 tracking-widest flex-shrink-0 mt-0.5">{c.date}</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-auto">
+                {c.skills.map((s) => (
+                  <span key={s} className={TAG_STYLES}>{s}</span>
+                ))}
+                <a
+                  href={certUrl(c.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-auto font-mono text-[10px] tracking-widest text-white/25 hover:text-[#ccff00] transition-colors self-center"
+                >
+                  VERIFY ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
+            style={{ background: "rgba(0,0,0,0.85)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setOpen(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={open.title}
+          >
+            <motion.div
+              className="flex flex-col items-center gap-4 max-w-5xl w-full"
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+            >
+              <img src={certImg(open.id)} alt={`${open.title} certificate`} className="w-full h-auto max-h-[80vh] object-contain rounded" />
+              <div className="flex gap-6 font-mono text-[11px] tracking-widest uppercase" onClick={(e) => e.stopPropagation()}>
+                <a href={certUrl(open.id)} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }}>
+                  Verify on LinkedIn ↗
+                </a>
+                <button onClick={() => setOpen(null)} className="text-white/60 hover:text-white uppercase tracking-widest">
+                  Close ✕
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ── HOME ──────────────────────────────────────────────────────────────────────
 
 function HomePage({ onNav }: { onNav: (p: Page) => void }) {
@@ -287,7 +515,7 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
         {/* Stat row */}
         <div className="flex flex-wrap gap-8 mb-10">
           {[
-            { val: "4+", label: "Projects shipped" },
+            { val: `${PROJECTS.length}`, label: "Projects on GitHub" },
             { val: STUDY_YEAR, label: "Year at RP" },
             { val: "Now", label: "Open to intern" },
           ].map(({ val, label }) => (
@@ -603,6 +831,9 @@ function AboutPage() {
             </div>
           </div>
         </div>
+
+        {/* Certifications */}
+        <Certifications />
       </section>
 
       {/* Divider */}
@@ -740,7 +971,7 @@ export default function App() {
       }}
     >
       <style>{`
-        @media (prefers-reduced-motion: reduce) { .ticker { animation: none !important; } }
+        @media (prefers-reduced-motion: reduce) { .ticker { animation-duration: 60s !important; } }
         :focus-visible { outline: 2px solid #ccff00; outline-offset: 3px; }
         @keyframes ticker {
           0%   { transform: translateX(0); }
