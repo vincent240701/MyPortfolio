@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "deploy": "vite build --mode pages && npx --yes gh-pages@6 -d dist -t",
     "typecheck": "tsc --noEmit",
     "dev:figma": "vite --host 0.0.0.0 --config vite.figma.config.ts"
   },
