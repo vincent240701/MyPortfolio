@@ -1,16 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { EMAIL, GITHUB_URL, LINKEDIN_URL, RESUME_URL, PHOTO_URL, CONTACT_ENDPOINT, STUDY_YEAR, EDUCATION_YEARS } from "./site.config";
+import { asset, EMAIL, GITHUB_URL, LINKEDIN_URL, RESUME_URL, PHOTO_URL, CONTACT_ENDPOINT, STUDY_YEAR, EDUCATION_YEARS } from "./site.config";
 
-type Page = "home" | "portfolio" | "about";
+type Page = "home" | "portfolio" | "about" | "contact";
 
 const ACCENT = "#ccff00";
 
 const NAV_LINKS: { label: string; page: Page }[] = [
   { label: "HOME", page: "home" },
   { label: "PORTFOLIO", page: "portfolio" },
-  { label: "ABOUT & CONTACT", page: "about" },
+  { label: "ABOUT", page: "about" },
+  { label: "CONTACT", page: "contact" },
 ];
 
 const TICKER_TEXT =
@@ -44,7 +45,7 @@ const PROJECTS: Project[] = [
     year: "2026",
     hue: 0,
     href: `${GH}/L10pokemon`,
-    image: "/projects/pokemon.jpg",
+    image: asset("projects/pokemon.jpg"),
   },
   {
     num: "02",
@@ -56,7 +57,7 @@ const PROJECTS: Project[] = [
     year: "2026",
     hue: 30,
     href: `${GH}/L06Quiz`,
-    image: "/projects/car-quiz.jpg",
+    image: asset("projects/car-quiz.jpg"),
   },
   {
     num: "03",
@@ -68,7 +69,7 @@ const PROJECTS: Project[] = [
     year: "2026",
     hue: 200,
     href: `${GH}/L08`,
-    image: "/projects/boat-showroom.jpg",
+    image: asset("projects/boat-showroom.jpg"),
   },
   {
     num: "04",
@@ -80,7 +81,7 @@ const PROJECTS: Project[] = [
     year: "2026",
     hue: 80,
     href: `${GH}/grade-checks`,
-    image: "/projects/grade-checks.jpg",
+    image: asset("projects/grade-checks.jpg"),
   },
   {
     num: "05",
@@ -92,7 +93,7 @@ const PROJECTS: Project[] = [
     year: "2026",
     hue: 290,
     href: `${GH}/MyPortfolio`,
-    image: "/projects/portfolio.jpg",
+    image: asset("projects/portfolio.jpg"),
   },
 ];
 
@@ -118,19 +119,27 @@ const CERTS: { title: string; date: string; skills: string[]; id: string }[] = [
   { title: "Certified Entry-Level Python Programmer (PCEP-30-02) Cert Prep", date: "Jul 2025", skills: ["Python"], id: "df5d0b6361b934ea91273863d98aa1dc6ce11b44e0fb83ae4cf8f645924d932c" },
 ];
 
-const SKILLS = [
-  "TypeScript",
-  "React",
-  "Flutter",
-  "Node.js",
-  "Go",
-  "PostgreSQL",
-  "Docker",
-  "AWS",
-  "GitHub Actions",
-  "Python",
-  "Git",
-  "Linux",
+// Skills, not tools (per the C390 brief). Tools are listed as supporting detail.
+const SKILLS: { skill: string; tools: string }[] = [
+  { skill: "Mobile app development", tools: "React Native · Expo" },
+  { skill: "Web development", tools: "React · TypeScript · Node.js · Express · HTML/CSS" },
+  { skill: "Software testing & QA", tools: "pytest · Playwright · TDD · GitHub Actions" },
+  { skill: "Programming", tools: "Python · JavaScript" },
+  { skill: "Image editing & illustration", tools: "Photoshop · Illustrator" },
+  { skill: "Agile project work", tools: "Scrum · requirements gathering" },
+  { skill: "Communication & presenting", tools: "Sales pitches · coaching" },
+  { skill: "Leadership & teamwork", tools: "Led a sales team of 5" },
+];
+
+const EXPERIENCE = [
+  { role: "Swim Coach", org: "", years: "2025 – 2026", text: "Coached children of varying skill levels, building water confidence, safety awareness and swimming ability." },
+  { role: "Salesman", org: "Optima", years: "2024 – 2025", text: "Led a field sales team of 5 and delivered product demos and on-site pitches, reaching a 40% closing rate." },
+];
+
+const EDUCATION = [
+  { course: "Diploma in Information Technology", school: "Republic Polytechnic", years: EDUCATION_YEARS },
+  { course: "Integrated Mechanical & Electrical Design", school: "ITE College Central", years: "2020 – 2022" },
+  { course: "Aerospace Avionics", school: "ITE College Central", years: "2018 – 2019" },
 ];
 
 // Project row: becomes a real link only when the project has an href.
@@ -357,7 +366,7 @@ function Ticker() {
 
 // ── Certifications ────────────────────────────────────────────────────────────
 
-const certImg = (id: string) => `/certs/${id.slice(0, 12)}.jpg`;
+const certImg = (id: string) => asset(`certs/${id.slice(0, 12)}.jpg`);
 const certUrl = (id: string) => `https://www.linkedin.com/learning/certificates/${id}`;
 
 function Certifications() {
@@ -483,11 +492,11 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
           </h1>
           <div className="mb-2 md:text-right max-w-xs">
             <p className="text-base text-white/45 leading-relaxed">
-              I build fast, dependable
+              I build mobile and web apps
               <br />
-              products for teams that
+              with React, React Native
               <br />
-              {"can't afford downtime."}
+              and Python, and test them properly.
             </p>
             <p className="font-mono text-[10px] tracking-widest text-white/20 uppercase mt-3">
               Singapore · {new Date().getFullYear()}
@@ -585,9 +594,9 @@ function HomePage({ onNav }: { onNav: (p: Page) => void }) {
 
         {/* Skills row */}
         <div className="flex flex-wrap gap-2 mt-12 pt-8" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="font-mono text-[10px] tracking-widest text-white/20 uppercase w-full mb-1">Stack</span>
+          <span className="font-mono text-[10px] tracking-widest text-white/20 uppercase w-full mb-1">Skills</span>
           {SKILLS.map((s) => (
-            <span key={s} className={TAG_STYLES}>{s}</span>
+            <span key={s.skill} className={TAG_STYLES}>{s.skill}</span>
           ))}
         </div>
       </section>
@@ -696,9 +705,137 @@ function PortfolioPage() {
   );
 }
 
-// ── ABOUT & CONTACT ───────────────────────────────────────────────────────────
+// ── ABOUT ───────────────────────────────────────────────────────────
 
 function AboutPage() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+      className="min-h-screen flex flex-col"
+    >
+      {/* About */}
+      <section className="px-6 md:px-10 pt-24 pb-14">
+        <div className="flex flex-col sm:flex-row gap-8 items-start">
+          {/* Profile placeholder */}
+          <div
+            className="w-32 h-40 sm:w-36 sm:h-44 rounded flex-shrink-0 flex items-end justify-center pb-3 overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, #141414 0%, #1a1a1a 100%)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            {PHOTO_URL ? (
+              <img src={PHOTO_URL} alt="Vincent" className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-mono text-[9px] text-white/15 tracking-widest">PHOTO</span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <p className="font-mono text-[11px] tracking-[0.28em] text-white/35 uppercase">About</p>
+            <h1
+              className="text-[clamp(2.5rem,8vw,5.5rem)] font-bold leading-[0.9] uppercase tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              {"HI, I'M"}
+              <br />
+              VINCENT<span style={{ color: ACCENT }}>.</span>
+            </h1>
+            <p className="text-sm text-white/45 max-w-sm leading-relaxed mt-1">
+              {"I'm Vincent Then, a Diploma in Information Technology student at Republic Polytechnic, Singapore, looking for an internship."}
+              {" I build mobile apps with React Native and web apps with React and Node.js, and I like writing tests that catch bugs before users do."}
+              {" Before IT, I studied engineering at ITE and worked as a swim coach and in field sales, which taught me to communicate clearly, lead a team and stay calm under pressure."}
+            </p>
+            <div className="flex flex-wrap gap-3 mt-2">
+              <a
+                href={RESUME_URL}
+                download
+                className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full text-black hover:brightness-90 transition-all"
+                style={{ background: ACCENT }}
+              >
+                DOWNLOAD RESUME
+              </a>
+              <a
+                href={`mailto:${EMAIL}`}
+                className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full border text-white hover:border-white/50 transition-all"
+                style={{ borderColor: "rgba(255,255,255,0.18)" }}
+              >
+                EMAIL ME
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div className="mt-12 pt-10" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">
+            Skills
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {SKILLS.map((s) => (
+              <div
+                key={s.skill}
+                className="px-4 py-3 rounded"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+              >
+                <p className="text-sm font-semibold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.skill}</p>
+                <p className="font-mono text-[10px] text-white/35 tracking-wider mt-1">{s.tools}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Experience */}
+        <div className="mt-10">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">Experience</p>
+          <div className="flex flex-col gap-2">
+            {EXPERIENCE.map((x) => (
+              <div key={x.role} className="p-5 rounded" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="flex items-start justify-between gap-4">
+                  <p className="font-semibold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {x.role}{x.org && <span className="text-white/40 font-normal"> · {x.org}</span>}
+                  </p>
+                  <span className="font-mono text-[10px] text-white/25 tracking-widest flex-shrink-0">{x.years}</span>
+                </div>
+                <p className="text-sm text-white/45 leading-relaxed mt-2">{x.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Education */}
+        <div className="mt-10">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">Education</p>
+          <div className="flex flex-col gap-2">
+            {EDUCATION.map((e) => (
+              <div key={e.course} className="p-5 rounded" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-semibold text-white mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{e.course}</p>
+                    <p className="font-mono text-[11px] text-white/40 tracking-wider">{e.school} · Singapore</p>
+                  </div>
+                  <span className="font-mono text-[10px] text-white/25 tracking-widest flex-shrink-0">{e.years}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Certifications */}
+        <Certifications />
+      </section>
+
+      <Footer />
+    </motion.div>
+  );
+}
+
+// ── CONTACT ───────────────────────────────────────────────────────────────────
+
+function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [note, setNote] = useState("");
@@ -737,113 +874,19 @@ function AboutPage() {
       transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
       className="min-h-screen flex flex-col"
     >
-      {/* About */}
-      <section className="px-6 md:px-10 pt-24 pb-14">
-        <div className="flex flex-col sm:flex-row gap-8 items-start">
-          {/* Profile placeholder */}
-          <div
-            className="w-32 h-40 sm:w-36 sm:h-44 rounded flex-shrink-0 flex items-end justify-center pb-3 overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, #141414 0%, #1a1a1a 100%)",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            {PHOTO_URL ? (
-              <img src={PHOTO_URL} alt="Vincent" className="w-full h-full object-cover" />
-            ) : (
-              <span className="font-mono text-[9px] text-white/15 tracking-widest">PHOTO</span>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <p className="font-mono text-[11px] tracking-[0.28em] text-white/35 uppercase">About</p>
-            <h1
-              className="text-[clamp(2.5rem,8vw,5.5rem)] font-bold leading-[0.9] uppercase tracking-tight"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              {"HI, I'M"}
-              <br />
-              VINCENT<span style={{ color: ACCENT }}>.</span>
-            </h1>
-            <p className="text-sm text-white/45 max-w-sm leading-relaxed mt-1">
-              Information Technology student at Republic Polytechnic, Singapore.
-              I build practical software — from web APIs to mobile apps — with
-              a focus on clean architecture and real-world impact. Currently
-              seeking internship opportunities where I can grow alongside a
-              driven team.
-            </p>
-            <div className="flex flex-wrap gap-3 mt-2">
-              <a
-                href={RESUME_URL}
-                download
-                className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full text-black hover:brightness-90 transition-all"
-                style={{ background: ACCENT }}
-              >
-                DOWNLOAD RESUME
-              </a>
-              <a
-                href={`mailto:${EMAIL}`}
-                className="w-fit px-5 py-2.5 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full border text-white hover:border-white/50 transition-all"
-                style={{ borderColor: "rgba(255,255,255,0.18)" }}
-              >
-                EMAIL ME
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Skills */}
-        <div className="mt-12 pt-10" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">
-            Skills &amp; Tools
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {SKILLS.map((s) => (
-              <span key={s} className={TAG_STYLES}>{s}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Education */}
-        <div className="mt-10">
-          <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">
-            Education
-          </p>
-          <div
-            className="p-5 rounded"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p
-                  className="font-semibold text-white mb-1"
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  Diploma in Information Technology
-                </p>
-                <p className="font-mono text-[11px] text-white/40 tracking-wider">
-                  Republic Polytechnic · Singapore
-                </p>
-              </div>
-              <span className="font-mono text-[10px] text-white/25 tracking-widest flex-shrink-0">
-                {EDUCATION_YEARS}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Certifications */}
-        <Certifications />
-      </section>
-
-      {/* Divider */}
-      <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", margin: "0 24px" }} />
-
       {/* Contact */}
-      <section className="px-6 md:px-10 py-14 flex-1">
+      <section className="px-6 md:px-10 pt-24 pb-14 flex-1">
         <p className="font-mono text-[11px] tracking-[0.28em] text-white/35 uppercase mb-4">
-          Get in Touch
+          Contact
         </p>
+        <h1
+          className="text-[clamp(3rem,10vw,7rem)] font-bold leading-[0.9] uppercase tracking-tight mb-8"
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+        >
+          {"LET'S"}
+          <br />
+          TALK<span style={{ color: ACCENT }}>.</span>
+        </h1>
         <a
           href={`mailto:${EMAIL}`}
           className="block text-[clamp(1.6rem,5vw,3rem)] font-bold mb-10 hover:opacity-80 transition-opacity"
@@ -851,6 +894,24 @@ function AboutPage() {
         >
           {EMAIL}
         </a>
+        <div className="flex flex-wrap gap-3 -mt-6 mb-10">
+          {[
+            { label: "LinkedIn ↗", href: LINKEDIN_URL },
+            { label: "GitHub ↗", href: GITHUB_URL },
+            { label: "Resume ↓", href: RESUME_URL },
+          ].map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 font-mono text-[11px] font-bold tracking-widest uppercase rounded-full border text-white hover:border-white/50 transition-all"
+              style={{ borderColor: "rgba(255,255,255,0.18)" }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
 
         {status === "sent" ? (
           <motion.div
@@ -986,6 +1047,7 @@ export default function App() {
           {page === "home" && <HomePage key="home" onNav={handleNav} />}
           {page === "portfolio" && <PortfolioPage key="portfolio" />}
           {page === "about" && <AboutPage key="about" />}
+          {page === "contact" && <ContactPage key="contact" />}
         </AnimatePresence>
       </main>
     </div>
