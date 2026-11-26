@@ -5,7 +5,8 @@ import { asset, EMAIL, GITHUB_URL, LINKEDIN_URL, RESUME_URL, PHOTO_URL, CONTACT_
 
 type Page = "home" | "portfolio" | "about" | "contact";
 
-const ACCENT = "#ccff00";
+// Brand palette (matches the design brief)
+const ACCENT = "#D7FF3F";
 
 const NAV_LINKS: { label: string; page: Page }[] = [
   { label: "HOME", page: "home" },
@@ -250,6 +251,18 @@ function ProjectThumb({ project, size = "sm" }: { project: Project; size?: "sm" 
   );
 }
 
+// ── Logo ──────────────────────────────────────────────────────────────────────
+// "VT" monogram: the V's right arm runs straight into the T's crossbar. Same art as public/logo.svg.
+
+function Logo({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" className="flex-shrink-0">
+      <rect width="40" height="40" rx="8" fill={ACCENT} />
+      <path d="M8 11 L14.5 29 L21 11 H33 M27 11 V29" fill="none" stroke="#0A0A0A" strokeWidth="4.5" strokeLinejoin="miter" strokeLinecap="square" />
+    </svg>
+  );
+}
+
 // ── Nav ───────────────────────────────────────────────────────────────────────
 
 function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
@@ -259,16 +272,18 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
     <nav
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 h-14"
       style={{
-        background: "rgba(12,12,12,0.88)",
+        background: "rgba(10,10,10,0.88)",
         backdropFilter: "blur(16px)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <button
-        className="font-mono text-xs tracking-[0.2em] text-white/50 hover:text-white transition-colors"
+        className="flex items-center gap-2.5 font-mono text-xs tracking-[0.2em] text-white/60 hover:text-white transition-colors"
         onClick={() => onNav("home")}
+        aria-label="Vincent Then, go to home"
       >
-        VINCENT
+        <Logo size={28} />
+        VINCENT THEN
       </button>
 
       {/* Desktop links */}
@@ -279,7 +294,7 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
               onClick={() => onNav(page)}
               aria-current={current === page ? "page" : undefined}
               className="relative font-mono text-[11px] tracking-widest uppercase transition-colors pb-px"
-              style={{ color: current === page ? "#ffffff" : "rgba(255,255,255,0.38)" }}
+              style={{ color: current === page ? "#F5F5F0" : "rgba(255,255,255,0.38)" }}
             >
               {label}
               {current === page && (
@@ -325,7 +340,7 @@ function Nav({ current, onNav }: { current: Page; onNav: (p: Page) => void }) {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           className="md:hidden absolute top-14 left-0 right-0 border-b border-white/8 py-5 flex flex-col gap-5 px-6"
-          style={{ background: "#0c0c0c" }}
+          style={{ background: "#0A0A0A" }}
         >
           {NAV_LINKS.map(({ label, page }) => (
             <button
@@ -389,7 +404,7 @@ function Certifications() {
           <div
             key={c.id}
             className="rounded overflow-hidden flex flex-col"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <button
               onClick={() => setOpen(c)}
@@ -418,7 +433,7 @@ function Certifications() {
                   href={certUrl(c.id)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-auto font-mono text-[10px] tracking-widest text-white/25 hover:text-[#ccff00] transition-colors self-center"
+                  className="ml-auto font-mono text-[10px] tracking-widest text-white/25 hover:text-[#D7FF3F] transition-colors self-center"
                 >
                   VERIFY ↗
                 </a>
@@ -648,7 +663,7 @@ function PortfolioPage() {
               key={f}
               onClick={() => setFilter(f)}
               className="relative font-mono text-[11px] tracking-widest uppercase pb-3 transition-colors"
-              style={{ color: filter === f ? "#ffffff" : "rgba(255,255,255,0.3)" }}
+              style={{ color: filter === f ? "#F5F5F0" : "rgba(255,255,255,0.3)" }}
             >
               {f}
               {filter === f && (
@@ -723,7 +738,7 @@ function AboutPage() {
           <div
             className="w-32 h-40 sm:w-36 sm:h-44 rounded flex-shrink-0 flex items-end justify-center pb-3 overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #141414 0%, #1a1a1a 100%)",
+              background: "#1A1A1A",
               border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
@@ -779,7 +794,7 @@ function AboutPage() {
               <div
                 key={s.skill}
                 className="px-4 py-3 rounded"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
+                style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.07)" }}
               >
                 <p className="text-sm font-semibold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.skill}</p>
                 <p className="font-mono text-[10px] text-white/35 tracking-wider mt-1">{s.tools}</p>
@@ -793,7 +808,7 @@ function AboutPage() {
           <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">Experience</p>
           <div className="flex flex-col gap-2">
             {EXPERIENCE.map((x) => (
-              <div key={x.role} className="p-5 rounded" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div key={x.role} className="p-5 rounded" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <p className="font-semibold text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {x.role}{x.org && <span className="text-white/40 font-normal"> · {x.org}</span>}
@@ -811,7 +826,7 @@ function AboutPage() {
           <p className="font-mono text-[11px] tracking-[0.25em] text-white/35 uppercase mb-4">Education</p>
           <div className="flex flex-col gap-2">
             {EDUCATION.map((e) => (
-              <div key={e.course} className="p-5 rounded" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div key={e.course} className="p-5 rounded" style={{ background: "#1A1A1A", border: "1px solid rgba(255,255,255,0.07)" }}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-semibold text-white mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{e.course}</p>
@@ -1026,14 +1041,14 @@ export default function App() {
     <div
       className="min-h-screen"
       style={{
-        background: "#0c0c0c",
-        color: "#ffffff",
+        background: "#0A0A0A",
+        color: "#F5F5F0",
         fontFamily: "'Space Grotesk', sans-serif",
       }}
     >
       <style>{`
         @media (prefers-reduced-motion: reduce) { .ticker { animation-duration: 60s !important; } }
-        :focus-visible { outline: 2px solid #ccff00; outline-offset: 3px; }
+        :focus-visible { outline: 2px solid #D7FF3F; outline-offset: 3px; }
         @keyframes ticker {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }

@@ -2,25 +2,25 @@
 
 :root {
   --font-size: 16px;
-  --background: #0c0c0c;
-  --foreground: #ffffff;
-  --card: #141414;
-  --card-foreground: #ffffff;
-  --popover: #141414;
-  --popover-foreground: #ffffff;
-  --primary: #ccff00;
-  --primary-foreground: #0c0c0c;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
+  --background: #0A0A0A;
+  --foreground: #F5F5F0;
+  --card: #1A1A1A;
+  --card-foreground: #F5F5F0;
+  --popover: #1A1A1A;
+  --popover-foreground: #F5F5F0;
+  --primary: #D7FF3F;
+  --primary-foreground: #0A0A0A;
+  --secondary: #1A1A1A;
+  --secondary-foreground: #F5F5F0;
   --muted: #1e1e1e;
-  --muted-foreground: #888888;
-  --accent: #ccff00;
-  --accent-foreground: #0c0c0c;
+  --muted-foreground: #8A8A85;
+  --accent: #D7FF3F;
+  --accent-foreground: #0A0A0A;
   --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
+  --destructive-foreground: #F5F5F0;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.06);
-  --input-background: #1a1a1a;
+  --input-background: #1A1A1A;
   --switch-background: #333333;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
@@ -79,6 +79,8 @@
 }
 
 @theme inline {
+  /* Brand off-white from the design brief: plain `text-white` renders #F5F5F0 */
+  --color-white: #F5F5F0;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
