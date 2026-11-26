@@ -736,14 +736,14 @@ function AboutPage() {
         <div className="flex flex-col sm:flex-row gap-8 items-start">
           {/* Profile placeholder */}
           <div
-            className="w-32 h-40 sm:w-36 sm:h-44 rounded flex-shrink-0 flex items-end justify-center pb-3 overflow-hidden"
+            className={`w-32 h-40 sm:w-36 sm:h-44 rounded flex-shrink-0 flex items-end justify-center overflow-hidden ${PHOTO_URL ? "" : "pb-3"}`}
             style={{
               background: "#1A1A1A",
               border: "1px solid rgba(255,255,255,0.08)",
             }}
           >
             {PHOTO_URL ? (
-              <img src={PHOTO_URL} alt="Vincent" className="w-full h-full object-cover" />
+              <img src={PHOTO_URL} alt="Vincent Then" className="w-full h-full object-cover object-top" />
             ) : (
               <span className="font-mono text-[9px] text-white/15 tracking-widest">PHOTO</span>
             )}

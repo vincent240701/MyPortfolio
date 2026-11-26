@@ -9,7 +9,7 @@ export const EMAIL = "23045361@myrp.edu.sg";
 export const GITHUB_URL = "https://github.com/vincent240701";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/vincent-then-a9253a377";
 export const RESUME_URL = asset("resume.pdf");
-export const PHOTO_URL = ""; // TODO: e.g. "/photo.jpg" (file in public/); grey placeholder while empty
+export const PHOTO_URL = asset("photo.jpg");
 
 export const STUDY_YEAR = "2nd";
 export const EDUCATION_YEARS = "2025 – Present";
