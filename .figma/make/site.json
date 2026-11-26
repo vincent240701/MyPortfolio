@@ -1,0 +1,10 @@
+{
+  "description": "Enables users to create detailed, high-fidelity wireframes for web and mobile apps, streamlining design and prototyping workflows.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
